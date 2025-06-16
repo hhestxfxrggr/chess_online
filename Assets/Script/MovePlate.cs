@@ -19,6 +19,10 @@ public class MovePlate : MonoBehaviour
         {
             gameObject.GetComponent<SpriteRenderer>().color = new Color(1.0f, 0.0f, 0.0f, 1.0f);
         }
+        //else if (IsCastlingMove())
+        //{
+        //    gameObject.GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 0.0f, 1.0f); // 노란색
+        //}
     }
 
     public void OnMouseUp()
@@ -28,6 +32,9 @@ public class MovePlate : MonoBehaviour
         if(attack)
         {
             GameObject cp = controller.GetComponent<Chess_Manager>().GetPosition(martixX, martixY);
+
+            if (cp.name == "white_king") controller.GetComponent<Chess_Manager>().Winner("black");
+            if (cp.name == "black_king") controller.GetComponent<Chess_Manager>().Winner("white");
 
             Destroy(cp);
         }
@@ -41,8 +48,48 @@ public class MovePlate : MonoBehaviour
 
         controller.GetComponent<Chess_Manager>().setPosition(reference);
 
+        controller.GetComponent<Chess_Manager>().NextTurn();
+
         reference.GetComponent<ChessMan>().DestroyMovePlates();
 
+        ChessMan cm = reference.GetComponent<ChessMan>();
+        if ((cm.name == "white_pawn" && martixY == 7) || (cm.name == "black_pawn" && martixY == 0))
+        {
+            cm.name = (cm.name.StartsWith("white")) ? "white_queen" : "black_queen";
+            cm.Activate(); // 스프라이트 갱신
+        }
+
+        //if ((cm.name == "white_king" && cm.GetXBoard() == 4 && cm.GetYBoard() == 0) ||
+        //    (cm.name == "black_king" && cm.GetXBoard() == 4 && cm.GetYBoard() == 7))
+        //{
+        //    // 오른쪽 캐슬링
+        //    if (martixX == 6)
+        //    {
+        //        GameObject rook = controller.GetComponent<Chess_Manager>().GetPosition(7, martixY);
+        //        if (rook != null && rook.GetComponent<ChessMan>().name == $"{cm.GetPlayer()}_rook")
+        //        {
+        //            controller.GetComponent<Chess_Manager>().SetPositionEmpty(7, martixY);
+        //            rook.GetComponent<ChessMan>().setXBoard(5);
+        //            rook.GetComponent<ChessMan>().setYBoard(martixY);
+        //            rook.GetComponent<ChessMan>().SetCoords();
+        //            controller.GetComponent<Chess_Manager>().setPosition(rook);
+        //        }
+        //    }
+
+        //    // 왼쪽 캐슬링
+        //    if (martixX == 2)
+        //    {
+        //        GameObject rook = controller.GetComponent<Chess_Manager>().GetPosition(0, martixY);
+        //        if (rook != null && rook.GetComponent<ChessMan>().name == $"{cm.GetPlayer()}_rook")
+        //        {
+        //            controller.GetComponent<Chess_Manager>().SetPositionEmpty(0, martixY);
+        //            rook.GetComponent<ChessMan>().setXBoard(3);
+        //            rook.GetComponent<ChessMan>().setYBoard(martixY);
+        //            rook.GetComponent<ChessMan>().SetCoords();
+        //            controller.GetComponent<Chess_Manager>().setPosition(rook);
+        //        }
+        //    }
+        //}
     }
 
     public void SetCoords(int x, int y)
@@ -57,5 +104,10 @@ public class MovePlate : MonoBehaviour
 
     public GameObject GetReference() { return reference; }
 
-
+    private bool IsCastlingMove()
+    {
+        // 킹이 이동하는 위치가 캐슬링 좌표인지 확인
+        return (reference != null && reference.GetComponent<ChessMan>().name.Contains("king") &&
+                (martixX == 2 || martixX == 6));
+    }
 }

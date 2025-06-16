@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+
 
 public class Chess_Manager : MonoBehaviour
 {
@@ -77,5 +80,48 @@ public class Chess_Manager : MonoBehaviour
     {
         if(x<0||y<0||x>= positions.GetLength(0) || y>=positions.GetLength(1)) return false;
         return true;
+    }
+
+    public string GetCurrentPlayer()
+    {
+        return currentPlayer;
+    }
+
+    public bool IsGameOver()
+    {
+        return gameOver;
+    }
+
+    public void NextTurn()
+    {
+        if(currentPlayer == "white")
+        {
+            currentPlayer = "black";
+        }
+        else
+        {
+            currentPlayer = "white";
+        }
+    }
+
+    public void Update()
+    {
+        
+        if (gameOver == true && Input.GetMouseButtonDown(0))
+        { 
+            gameOver = false;
+
+            SceneManager.LoadScene("Game");
+        }
+    }
+
+    public void Winner(string playerWinner)
+    {
+        gameOver = true;
+
+        GameObject.FindGameObjectWithTag("WinnerText").GetComponent<TextMeshProUGUI>().enabled = true;
+        GameObject.FindGameObjectWithTag("WinnerText").GetComponent<TextMeshProUGUI>().text = playerWinner + " is the winner";
+
+        GameObject.FindGameObjectWithTag("RestartText").GetComponent<TextMeshProUGUI>().enabled = true;
     }
 }
