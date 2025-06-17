@@ -1,14 +1,17 @@
-using System;
+ï»¿using System;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using UnityEngine;
+
 
 public class ChessClient : MonoBehaviour
 {
     private TcpClient client;
     private NetworkStream stream;
     private Thread recvThread;
+    public static ChessClient Instance;
     public string serverIP = "127.0.0.1";
     public int serverPort = 9000;
 
@@ -22,6 +25,13 @@ public class ChessClient : MonoBehaviour
         Disconnect();
     }
 
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+        DontDestroyOnLoad(gameObject); // ì”¬ ì „í™˜ì—ë„ ìœ ì§€
+    }
+
     public void ConnectToServer()
     {
         try
@@ -29,19 +39,19 @@ public class ChessClient : MonoBehaviour
             client = new TcpClient();
             client.Connect(serverIP, serverPort);
             stream = client.GetStream();
-            Debug.Log("¼­¹ö ¿¬°á ¼º°ø");
+            Debug.Log("ì„œë²„ ì—°ê²° ì„±ê³µ");
 
-            // ¼ö½Å ½º·¹µå ½ÃÀÛ
+            // ìˆ˜ì‹  ìŠ¤ë ˆë“œ ì‹œì‘
             recvThread = new Thread(new ThreadStart(Receive));
             recvThread.IsBackground = true;
             recvThread.Start();
 
-            // Å×½ºÆ®¿ë: ·Î±×ÀÎ Àü¼Û
+            // í…ŒìŠ¤íŠ¸ìš©: ë¡œê·¸ì¸ ì „ì†¡
             Send("LOGIN:unity_client");
         }
         catch (Exception e)
         {
-            Debug.LogError("¼­¹ö ¿¬°á ½ÇÆĞ: " + e.Message);
+            Debug.LogError("ì„œë²„ ì—°ê²° ì‹¤íŒ¨: " + e.Message);
         }
     }
 
@@ -65,12 +75,12 @@ public class ChessClient : MonoBehaviour
                 if (bytes <= 0) break;
 
                 string msg = Encoding.UTF8.GetString(buffer, 0, bytes);
-                Debug.Log("¼­¹ö ÀÀ´ä: " + msg);
+                Debug.Log("ì„œë²„ ì‘ë‹µ: " + msg);
             }
         }
         catch (Exception e)
         {
-            Debug.LogError("¼ö½Å ¿À·ù: " + e.Message);
+            Debug.LogError("ìˆ˜ì‹  ì˜¤ë¥˜: " + e.Message);
         }
     }
 
@@ -81,5 +91,38 @@ public class ChessClient : MonoBehaviour
 
         stream?.Close();
         client?.Close();
+    }
+
+    public static byte[] StructToBytes<T>(T str) where T : struct
+    {
+        int size = Marshal.SizeOf(str);
+        byte[] arr = new byte[size];
+        IntPtr ptr = Marshal.AllocHGlobal(size);
+        Marshal.StructureToPtr(str, ptr, true);
+        Marshal.Copy(ptr, arr, 0, size);
+        Marshal.FreeHGlobal(ptr);
+        return arr;
+    }
+
+    public void SendMoveStruct(int fromX, int fromY, int toX, int toY)
+    {
+        if (client == null || !client.Connected) return;
+
+        MovePacket packet = new MovePacket
+        {
+            fromX = fromX,
+            fromY = fromY,
+            toX = toX,
+            toY = toY
+        };
+
+        byte[] structBytes = StructToBytes(packet);
+        byte[] dataToSend = new byte[1 + structBytes.Length];
+
+        dataToSend[0] = 0x02; // 1ë°”ì´íŠ¸ êµ¬ë¶„ì: MovePacket
+        Buffer.BlockCopy(structBytes, 0, dataToSend, 1, structBytes.Length);
+
+        stream.Write(dataToSend, 0, dataToSend.Length);
+        stream.Flush();
     }
 }

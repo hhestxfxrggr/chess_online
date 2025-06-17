@@ -5,13 +5,15 @@ using UnityEngine;
 public class MovePlate : MonoBehaviour
 {
     public GameObject controller;
-
+   
     GameObject reference = null;
 
     int martixX;
     int martixY;
 
     public bool attack = false;
+
+    
 
     public void Start()
     {
@@ -39,6 +41,13 @@ public class MovePlate : MonoBehaviour
             Destroy(cp);
         }
 
+        //말 이동 위치 저장
+        int fromX = reference.GetComponent<ChessMan>().GetXBoard();
+        int fromY = reference.GetComponent<ChessMan>().GetYBoard();
+        int toX = martixX;
+        int toY = martixY;
+
+
         controller.GetComponent<Chess_Manager>().SetPositionEmpty(reference.GetComponent<ChessMan>().GetXBoard()
             ,reference.GetComponent<ChessMan>().GetYBoard());
 
@@ -58,6 +67,13 @@ public class MovePlate : MonoBehaviour
             cm.name = (cm.name.StartsWith("white")) ? "white_queen" : "black_queen";
             cm.Activate(); // 스프라이트 갱신
         }
+
+        if (ChessClient.Instance != null)
+        {
+            ChessClient.Instance.SendMoveStruct(fromX, fromY, toX, toY);
+        }
+
+
 
         //if ((cm.name == "white_king" && cm.GetXBoard() == 4 && cm.GetYBoard() == 0) ||
         //    (cm.name == "black_king" && cm.GetXBoard() == 4 && cm.GetYBoard() == 7))
