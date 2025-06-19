@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2933856712349733036}
   m_Layer: 0
   m_Name: Chesspiece
-  m_TagString: Untagged
+  m_TagString: ChessPiece
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -98,20 +98,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e06a0e65ce74ca42a6427dc8bd87ad7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  manager: {fileID: 0}
+  controller: {fileID: 0}
   movePlate: {fileID: 5036102373660380904, guid: 4d1bafb11180d7b4abad659c6f0a5582, type: 3}
   black_queen: {fileID: 21300000, guid: ae31b339c55193340973fca0af565e96, type: 3}
   black_knight: {fileID: 21300000, guid: 1e3ef5e4794069542b080727882b09bc, type: 3}
   black_bishop: {fileID: 21300000, guid: 0be38fe0dbcf0a742a7c60de87a991ff, type: 3}
-  black_pawn: {fileID: 21300000, guid: f244fe61f313bf945b9af53ffcb425e0, type: 3}
   black_king: {fileID: 21300000, guid: bfa3bdc99ab9e034080ff8df5d06e196, type: 3}
   black_rook: {fileID: 21300000, guid: 64e770eba41c6b046883862b7bc93ad6, type: 3}
+  black_pawn: {fileID: 21300000, guid: f244fe61f313bf945b9af53ffcb425e0, type: 3}
   white_queen: {fileID: 21300000, guid: 55760f8be0692a04d8ac5d53aa9b7774, type: 3}
   white_knight: {fileID: 21300000, guid: 294c17f34c3c00f478a209a55076b073, type: 3}
   white_bishop: {fileID: 21300000, guid: d4c571a877dcf8b4582b4df14bd8a3fb, type: 3}
-  white_pawn: {fileID: 21300000, guid: abaa00cbbdab4164c851bcdc3bea7c96, type: 3}
   white_king: {fileID: 21300000, guid: cf85c0bbb9354014b9942cfc05c87cba, type: 3}
   white_rook: {fileID: 21300000, guid: 65901e1fc0db59747829c440b356976d, type: 3}
+  white_pawn: {fileID: 21300000, guid: abaa00cbbdab4164c851bcdc3bea7c96, type: 3}
 --- !u!61 &2933856712349733036
 BoxCollider2D:
   m_ObjectHideFlags: 0

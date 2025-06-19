@@ -29,14 +29,37 @@ public class MovePlate : MonoBehaviour
 
     public void OnMouseUp()
     {
+
         controller = GameObject.FindGameObjectWithTag("GameController");
 
-        if(attack)
+        //if (!ChessClient.Instance.isGameActive)
+        //{
+        //    Debug.Log("[차단] 서버 응답 대기 중이거나 내 턴이 아님");
+        //    return;
+        //}
+
+        if (!ChessSyncManager.Instance.ReadyFlag)
+        {
+            Debug.Log("[차단] 서버 응답 대기 중이거나 내 턴이 아님");
+            return;
+        }
+
+        if (ChessClient.Instance.myTeam != controller.GetComponent<Chess_Manager>().GetCurrentPlayer())
+        {
+            Debug.Log($"[차단] 내 턴이 아닙니다. 현재 턴: {controller.GetComponent<Chess_Manager>().GetCurrentPlayer()}");
+            return;
+        }
+        Debug.Log($"[차단] 턴 확인용. 팀: {ChessClient.Instance.myTeam}, {controller.GetComponent<Chess_Manager>().GetCurrentPlayer()}");
+        
+        if (attack)
         {
             GameObject cp = controller.GetComponent<Chess_Manager>().GetPosition(martixX, martixY);
 
-            if (cp.name == "white_king") controller.GetComponent<Chess_Manager>().Winner("black");
-            if (cp.name == "black_king") controller.GetComponent<Chess_Manager>().Winner("white");
+            if (cp.name == "white_king" || cp.name == "black_king")
+            {
+                int winner = (cp.name == "black_king") ? 0 : 1; // white wins if black king dies
+                ChessClient.Instance.SendVictory(winner);       // 서버에 승리 패킷 전송
+            }
 
             Destroy(cp);
         }
@@ -51,14 +74,12 @@ public class MovePlate : MonoBehaviour
         controller.GetComponent<Chess_Manager>().SetPositionEmpty(reference.GetComponent<ChessMan>().GetXBoard()
             ,reference.GetComponent<ChessMan>().GetYBoard());
 
-        reference.GetComponent<ChessMan>().setXBoard(martixX);
-        reference.GetComponent<ChessMan>().setYBoard(martixY);
+        reference.GetComponent<ChessMan>().SetXBoard(martixX);
+        reference.GetComponent<ChessMan>().SetYBoard(martixY);
         reference.GetComponent<ChessMan>().SetCoords();
 
         controller.GetComponent<Chess_Manager>().setPosition(reference);
-
         controller.GetComponent<Chess_Manager>().NextTurn();
-
         reference.GetComponent<ChessMan>().DestroyMovePlates();
 
         ChessMan cm = reference.GetComponent<ChessMan>();
@@ -70,42 +91,9 @@ public class MovePlate : MonoBehaviour
 
         if (ChessClient.Instance != null)
         {
-            ChessClient.Instance.SendMoveStruct(fromX, fromY, toX, toY);
+            //패킷 전송
+            ChessClient.Instance.SendMoveStruct(fromX, fromY, toX, toY,attack,controller.GetComponent<Chess_Manager>().GetCurrentPlayer());
         }
-
-
-
-        //if ((cm.name == "white_king" && cm.GetXBoard() == 4 && cm.GetYBoard() == 0) ||
-        //    (cm.name == "black_king" && cm.GetXBoard() == 4 && cm.GetYBoard() == 7))
-        //{
-        //    // 오른쪽 캐슬링
-        //    if (martixX == 6)
-        //    {
-        //        GameObject rook = controller.GetComponent<Chess_Manager>().GetPosition(7, martixY);
-        //        if (rook != null && rook.GetComponent<ChessMan>().name == $"{cm.GetPlayer()}_rook")
-        //        {
-        //            controller.GetComponent<Chess_Manager>().SetPositionEmpty(7, martixY);
-        //            rook.GetComponent<ChessMan>().setXBoard(5);
-        //            rook.GetComponent<ChessMan>().setYBoard(martixY);
-        //            rook.GetComponent<ChessMan>().SetCoords();
-        //            controller.GetComponent<Chess_Manager>().setPosition(rook);
-        //        }
-        //    }
-
-        //    // 왼쪽 캐슬링
-        //    if (martixX == 2)
-        //    {
-        //        GameObject rook = controller.GetComponent<Chess_Manager>().GetPosition(0, martixY);
-        //        if (rook != null && rook.GetComponent<ChessMan>().name == $"{cm.GetPlayer()}_rook")
-        //        {
-        //            controller.GetComponent<Chess_Manager>().SetPositionEmpty(0, martixY);
-        //            rook.GetComponent<ChessMan>().setXBoard(3);
-        //            rook.GetComponent<ChessMan>().setYBoard(martixY);
-        //            rook.GetComponent<ChessMan>().SetCoords();
-        //            controller.GetComponent<Chess_Manager>().setPosition(rook);
-        //        }
-        //    }
-        //}
     }
 
     public void SetCoords(int x, int y)
